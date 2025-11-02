@@ -1,0 +1,22 @@
+# Python/Conda/VSCode
+.backend_env/
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Docker & PG data
+pgdata/
+docker-compose.override.yml
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+EOF
