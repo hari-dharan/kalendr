@@ -1,9 +1,10 @@
 # Python/Conda/VSCode
 .backend_env/
 backend/.venv/
-backend/__pycache__/
-backend/*.pyc
+backend/src/__pycache__/
+backend/src/*.pyc
 backend/.env
+__pycache__/
 
 # Node
 frontend/node_modules/
