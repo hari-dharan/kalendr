@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { eventAPI, type Event, type EventCreate } from '../services/api';
 import './Calendar.css';
@@ -9,7 +10,6 @@ const Calendar = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load events on component mount
   useEffect(() => {
     loadEvents();
   }, []);
@@ -18,7 +18,12 @@ const Calendar = () => {
     try {
       setLoading(true);
       const fetchedEvents = await eventAPI.getEvents();
-      setEvents(fetchedEvents);
+      // Transform for FullCalendar: all_day -> allDay
+      const transformedEvents = fetchedEvents.map(event => ({
+        ...event,
+        allDay: event.all_day
+      }));
+      setEvents(transformedEvents);
     } catch (error) {
       console.error('Failed to load events:', error);
     } finally {
@@ -26,29 +31,34 @@ const Calendar = () => {
     }
   };
 
-  // Handle date selection (for creating new events)
   const handleDateSelect = async (selectInfo: any) => {
     const title = prompt('Enter event title:');
     if (!title) return;
 
     const newEvent: EventCreate = {
       title,
+      description: '',
+      location: '',
       start: selectInfo.startStr,
       end: selectInfo.endStr,
-      color: '#3b82f6' // Default blue color
+      all_day: selectInfo.allDay,
+      color: '#3b82f6'
     };
 
     try {
       const createdEvent = await eventAPI.createEvent(newEvent);
-      setEvents(prev => [...prev, createdEvent]);
-      selectInfo.view.calendar.unselect(); // Clear the selection
+      const transformedEvent = {
+        ...createdEvent,
+        allDay: createdEvent.all_day
+      };
+      setEvents(prev => [...prev, transformedEvent]);
+      selectInfo.view.calendar.unselect();
     } catch (error) {
       console.error('Failed to create event:', error);
       alert('Failed to create event');
     }
   };
 
-  // Handle event click (for editing/deleting)
   const handleEventClick = async (clickInfo: any) => {
     const event = clickInfo.event;
     const action = prompt(
@@ -72,12 +82,19 @@ const Calendar = () => {
         try {
           const updatedEvent: EventCreate = {
             title: newTitle,
+            description: event.extendedProps?.description || '',
+            location: event.extendedProps?.location || '',
             start: event.startStr,
-            end: event.endStr,
-            color: event.backgroundColor
+            end: event.endStr || event.startStr,
+            all_day: event.allDay,
+            color: event.backgroundColor || '#3b82f6'
           };
           const result = await eventAPI.updateEvent(event.id, updatedEvent);
-          setEvents(prev => prev.map(e => e.id === event.id ? result : e));
+          const transformedResult = {
+            ...result,
+            allDay: result.all_day
+          };
+          setEvents(prev => prev.map(e => e.id === event.id ? transformedResult : e));
         } catch (error) {
           console.error('Failed to update event:', error);
           alert('Failed to update event');
@@ -102,12 +119,22 @@ const Calendar = () => {
       </div>
       
       <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,dayGridWeek'
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        }}
+        views={{
+          timeGridWeek: {
+            allDaySlot: true,
+            slotDuration: '00:30:00'
+          },
+          timeGridDay: {
+            allDaySlot: true,
+            slotDuration: '00:30:00'
+          }
         }}
         events={events}
         selectable={true}
@@ -118,6 +145,12 @@ const Calendar = () => {
         dayMaxEvents={true}
         height="auto"
         eventDisplay="block"
+        slotMinTime="06:00:00"
+        slotMaxTime="22:00:00"
+        businessHours={{
+          startTime: '09:00',
+          endTime: '17:00'
+        }}
       />
     </div>
   );

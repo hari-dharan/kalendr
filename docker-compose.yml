@@ -1,10 +1,29 @@
 services:
+  db:
+    image: postgres:15
+    container_name: kalendr_db
+    environment:
+      POSTGRES_DB: kalendr_db
+      POSTGRES_USER: kalendr_user
+      POSTGRES_PASSWORD: kalendr_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kalendr_user -d kalendr_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   backend:
     build: ./backend
+    container_name: kalendr_backend
+    environment:
+      DATABASE_URL: postgresql://kalendr_user:kalendr_password@db:5432/kalendr_db
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/kalendr
     depends_on:
       db:
         condition: service_healthy
@@ -12,27 +31,11 @@ services:
 
   frontend:
     build: ./frontend
+    container_name: kalendr_frontend
     ports:
       - "3000:3000"
     depends_on:
       - backend
-    restart: unless-stopped
-
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: kalendr
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d kalendr"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
 
 volumes:

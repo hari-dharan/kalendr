@@ -1,21 +1,27 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000", // your FastAPI backend
+  baseURL: "http://localhost:8000",
 });
 
 export interface Event {
   id: string;
   title: string;
+  description?: string;
+  location?: string;
   start: string;
   end?: string;
+  all_day: boolean;
   color?: string;
 }
 
 export interface EventCreate {
   title: string;
+  description?: string;
+  location?: string;
   start: string;
   end?: string;
+  all_day: boolean;
   color?: string;
 }
 
@@ -46,4 +52,3 @@ export const eventAPI = {
 };
 
 export default api;
-

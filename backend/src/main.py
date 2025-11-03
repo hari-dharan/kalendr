@@ -23,6 +23,14 @@ def get_db():
     finally:
         db.close()
 
+@app.get("/")
+def read_root():
+    return {"message": "Kalendr API is running", "version": "1.0.0"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "kalendr-backend"}
+
 @app.get("/events", response_model=list[schemas.Event])
 def list_events(db: Session = Depends(get_db)):
     return db.query(models.Event).order_by(models.Event.start_time).all()
@@ -31,8 +39,11 @@ def list_events(db: Session = Depends(get_db)):
 def create_event(event: schemas.EventCreate, db: Session = Depends(get_db)):
     db_event = models.Event(
         title=event.title,
+        description=event.description,
+        location=event.location,
         start_time=event.start,
         end_time=event.end,
+        all_day=event.all_day,
         color=event.color
     )
     db.add(db_event)
@@ -45,10 +56,15 @@ def update_event(event_id: str, event: schemas.EventCreate, db: Session = Depend
     db_event = db.query(models.Event).filter(models.Event.id == uuid.UUID(event_id)).first()
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
+    
     db_event.title = event.title
+    db_event.description = event.description
+    db_event.location = event.location
     db_event.start_time = event.start
     db_event.end_time = event.end
+    db_event.all_day = event.all_day
     db_event.color = event.color
+    
     db.commit()
     db.refresh(db_event)
     return db_event
@@ -58,6 +74,7 @@ def delete_event(event_id: str, db: Session = Depends(get_db)):
     db_event = db.query(models.Event).filter(models.Event.id == uuid.UUID(event_id)).first()
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
+    
     db.delete(db_event)
     db.commit()
-    return {"status": "deleted"}
+    return {"message": "Event deleted successfully"}
