@@ -18,7 +18,6 @@ const Calendar = () => {
     try {
       setLoading(true);
       const fetchedEvents = await eventAPI.getEvents();
-      // Transform for FullCalendar: all_day -> allDay
       const transformedEvents = fetchedEvents.map(event => ({
         ...event,
         allDay: event.all_day
@@ -42,7 +41,7 @@ const Calendar = () => {
       start: selectInfo.startStr,
       end: selectInfo.endStr,
       all_day: selectInfo.allDay,
-      color: '#3b82f6'
+      color: '#1a73e8'
     };
 
     try {
@@ -87,7 +86,7 @@ const Calendar = () => {
             start: event.startStr,
             end: event.endStr || event.startStr,
             all_day: event.allDay,
-            color: event.backgroundColor || '#3b82f6'
+            color: event.backgroundColor || '#1a73e8'
           };
           const result = await eventAPI.updateEvent(event.id, updatedEvent);
           const transformedResult = {
@@ -105,53 +104,81 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <div className="calendar-container">
-        <div className="loading">Loading calendar...</div>
+      <div className="calendar-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading calendar...</p>
       </div>
     );
   }
 
   return (
-    <div className="calendar-container">
-      <div className="calendar-header">
-        <h1>Kalendr</h1>
-        <p>Click and drag to create events, click events to edit or delete</p>
-      </div>
+    <div className="calendar-app">
+      <header className="calendar-header">
+        <div className="header-left">
+          <h1 className="app-title">Kalendr</h1>
+        </div>
+        <div className="header-center">
+          <button className="today-btn">Today</button>
+        </div>
+        <div className="header-right">
+          <div className="view-switcher">
+            <button className="view-btn active">Month</button>
+            <button className="view-btn">Week</button>
+            <button className="view-btn">Day</button>
+          </div>
+        </div>
+      </header>
       
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        views={{
-          timeGridWeek: {
-            allDaySlot: true,
-            slotDuration: '00:30:00'
-          },
-          timeGridDay: {
-            allDaySlot: true,
-            slotDuration: '00:30:00'
-          }
-        }}
-        events={events}
-        selectable={true}
-        selectMirror={true}
-        select={handleDateSelect}
-        eventClick={handleEventClick}
-        editable={true}
-        dayMaxEvents={true}
-        height="auto"
-        eventDisplay="block"
-        slotMinTime="06:00:00"
-        slotMaxTime="22:00:00"
-        businessHours={{
-          startTime: '09:00',
-          endTime: '17:00'
-        }}
-      />
+      <div className="calendar-container">
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          headerToolbar={false}
+          views={{
+            timeGridWeek: {
+              allDaySlot: true,
+              slotDuration: '00:30:00',
+              slotLabelInterval: '01:00:00'
+            },
+            timeGridDay: {
+              allDaySlot: true,
+              slotDuration: '00:15:00',
+              slotLabelInterval: '01:00:00'
+            },
+            dayGridMonth: {
+              dayMaxEvents: 3
+            }
+          }}
+          events={events}
+          selectable={true}
+          selectMirror={true}
+          select={handleDateSelect}
+          eventClick={handleEventClick}
+          editable={true}
+          droppable={true}
+          height="100%"
+          expandRows={true}
+          slotMinTime="00:00:00"
+          slotMaxTime="24:00:00"
+          scrollTime="08:00:00"
+          nowIndicator={true}
+          slotLabelFormat={{
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: false
+          }}
+          dayHeaderFormat={{
+            weekday: 'short',
+            month: 'numeric',
+            day: 'numeric'
+          }}
+          allDayText="All day"
+          eventDisplay="block"
+          eventBackgroundColor="#1a73e8"
+          eventBorderColor="#1a73e8"
+          eventTextColor="#ffffff"
+        />
+      </div>
     </div>
   );
 };
