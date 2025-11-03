@@ -16,4 +16,4 @@ class Event(EventBase):
     id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True
