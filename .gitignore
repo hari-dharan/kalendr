@@ -1,24 +1,76 @@
-# Python/Conda/VSCode
-.backend_env/
-backend/.venv/
-backend/src/__pycache__/
-backend/src/*.pyc
-backend/.env
+# =========================
+# Python
+# =========================
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
+*.log
+*.sqlite3
 
-# Node
-frontend/node_modules/
-frontend/dist/
+# Virtual environments
+venv/
+env/
+.venv/
+.kalendr-py/
 
-# Docker & PG data
-pgdata/
-docker-compose.override.yml
-
-# VSCode
+# IDEs
+.idea/
 .vscode/
+*.sublime-project
+*.sublime-workspace
 
-# OS
+# =========================
+# Node / Frontend (React / Vite)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite build outputs
+dist/
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+*.dockerignore
+*.log
+*.pid
+*.swp
+docker-compose.override.yml
+**/tmp/
+**/data/
+
+# =========================
+# Misc / OS
+# =========================
 .DS_Store
 Thumbs.db
-EOF
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# =========================
+# Git
+# =========================
+*.orig
+*.rej
